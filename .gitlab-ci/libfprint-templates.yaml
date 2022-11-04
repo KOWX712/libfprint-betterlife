@@ -48,4 +48,6 @@
       openssl \
       pixman \
       python3-gobject \
-      python3-gobject-base
+      python3-gobject-base \
+      opencv-devel \
+      doctest-devel
