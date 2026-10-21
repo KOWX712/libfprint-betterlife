@@ -71,6 +71,11 @@ usb:v08FFp5501*
  ID_AUTOSUSPEND=1
  ID_PERSIST=0
 
+# Supported by libfprint driver betterlife
+usb:v347Dp0302*
+ ID_AUTOSUSPEND=1
+ ID_PERSIST=0
+
 # Supported by libfprint driver egis0570
 usb:v1C7Ap0570*
 usb:v1C7Ap0571*
