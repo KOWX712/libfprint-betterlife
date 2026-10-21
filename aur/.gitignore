@@ -1,0 +1,5 @@
+libfprint-betterlife/
+pkg/
+src/
+.SRCINFO
+*.tar.zst

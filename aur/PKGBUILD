@@ -1,0 +1,60 @@
+# Maintainer: kowx712
+# AUR-style packaging for the libfprint betterlife-347d-0302 branch:
+# stock libfprint + SIGFM matcher (MR !418) + Blestech Betterlife 347d:0302 driver.
+pkgname=libfprint-betterlife-git
+pkgver=1.94.100.r34.g12cce32
+pkgrel=1
+pkgdesc="Generic library for fingerprint reader access, with Blestech Betterlife 347d:0302 support"
+arch=(x86_64)
+url="https://gitlab.freedesktop.org/libfprint/libfprint"
+license=(LGPL-2.1-or-later)
+depends=(
+  gcc-libs    # libgcc + libstdc++ (SIGFM matcher is C++)
+  glib2       # glib-2.0 / gobject-2.0 / gio-unix-2.0 / gmodule-2.0
+  libgudev    # gudev-1.0 (elanspi SPI helper)
+  libgusb     # gusb >= 0.2.0
+  libusb      # pulled in via gusb; listed explicitly
+  opencv      # opencv4/opencv5 -- SIGFM matcher (new dep of this branch)
+  openssl     # openssl >= 3.0 -- uru4000 + betterlife secure channel (SM2/SM3/SM4)
+  pixman      # pixman-1 (aes3500/aes4000 helper)
+)
+makedepends=(
+  git
+  meson       # also provides arch-meson on Arch
+  systemd     # udev.pc: dependency('udev') resolves udev_rules/udev_hwdb install dirs
+)
+# libfprint-2.so=2-64: soname provide (same ABI tag as the official libfprint
+# package) so soname deps like fprintd's resolve against this package.
+provides=(libfprint=$pkgver 'libfprint-2.so=2-64')
+conflicts=(libfprint)
+# Build from the local branch clone. Once the branch is pushed, switch to:
+# source=("libfprint-betterlife::git+https://gitlab.freedesktop.org/libfprint/libfprint.git#branch=betterlife-347d-0302")
+source=("libfprint-betterlife::git+file:///home/kowx712/GitHub/libfprint#branch=betterlife-347d-0302")
+sha256sums=('SKIP')
+
+pkgver() {
+  cd libfprint-betterlife
+  git describe --tags | sed 's/^v//;s/-/.r/;s/-/./g'
+}
+
+prepare() {
+  cd libfprint-betterlife
+}
+
+build() {
+  # -Dintrospection=false -Ddoc=false: this build environment has no
+  # g-ir-scanner / gtkdoc-scan (gobject-introspection and gtk-doc are not
+  # needed for the runtime library), so disable both explicitly.
+  arch-meson libfprint-betterlife build \
+    -Dintrospection=false \
+    -Ddoc=false
+  meson compile -C build
+}
+
+check() {
+  meson test -C build --print-errorlogs
+}
+
+package() {
+  meson install -C build --destdir "$pkgdir"
+}
